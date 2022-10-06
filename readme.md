@@ -1,21 +1,55 @@
-## Publishing
+# Envari
 
-Once all `TODO` notes have been updated & your new module is ready to be shared, all that's left to do is decide its new version &mdash; AKA, do the changes consitute a `patch`, `minor`, or `major` release?
+A safer way to load .env files
 
-Once decided, you can run the following:
+## Installation
 
-```sh
-$ npm version <patch|minor|major> && git push origin master --tags && npm publish
-# Example:
-# npm version patch && git push origin master --tags && npm publish
+```bash
+yarn add envari
 ```
 
-This command sequence will:
+## Options
 
--   version your module, updating the `package.json` "version"
--   create and push a `git` tag (matching the new version) to your repository
--   build your module (via the `prepublishOnly` script)
--   publish the module to the npm registry
+-   `requiredProperties`: The properties that should be present in the .env file
+-   `requiredKeys`: Alias for `requiredProperties`
+-   `missingPropertyBehavior`: The action that should be taken if a required property is missing
+    -   `"THROW"` (default): Throw an error
+    -   `"FALLBACK"`: Use an empty string for the property instead
+-   `filePath`: The file path to the .env file (defaults to the .env file in the project root)
+
+## Usage
+
+```js
+import * as Envari from "envari";
+
+export const env = Envari.load({
+    requiredProperties: ["SECRET_KEY"],
+    missingPropertyBehavior: "FALLBACK",
+    filePath: "/some/path/to/.env",
+});
+```
+
+With Typescript:
+
+```js
+import * as Envari from "envari";
+
+export const env = Envari.load<{
+    SECRET_KEY: string;
+}>({
+    requiredProperties: ["SECRET_KEY"],
+    missingPropertyBehavior: "FALLBACK",
+    filePath: "/some/path/to/.env",
+});
+```
+
+The result of calling `Envari.load` will be an object representation of your `.env` file.
+Envari also automatically populates `process.env` with your `.env` values.
+
+```js
+console.log(env.SECRET_KEY); // "*******"
+console.log(process.env.SECRET_KEY); // "*******"
+```
 
 ## License
 
