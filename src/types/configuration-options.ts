@@ -2,12 +2,7 @@ export interface EnvariConfigurationOptions {
     /**
      * The properties that should be present in the .env file
      */
-    requiredProperties?: string[];
-
-    /**
-     * Alias for `requiredProperties`
-     */
-    requiredKeys?: string[];
+    properties?: Record<string, true>;
 
     /**
      * The action that should be taken if a required property is missing

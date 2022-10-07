@@ -5,13 +5,13 @@ describe("Envari", () => {
         // eslint-disable-next-line unicorn/prefer-module
         const environmentFilePath = `${__dirname}/vendor/example.env`;
 
-        const environment = load<{
-            SIMPLE: string;
-            QUOTED: string;
-            COMMENT_INSIDE_QUOTES: string;
-        }>({
+        const environment = load({
             filePath: environmentFilePath,
-            requiredKeys: ["SIMPLE", "QUOTED", "COMMENT_INSIDE_QUOTES"],
+            properties: {
+                SIMPLE: true,
+                QUOTED: true,
+                COMMENT_INSIDE_QUOTES: true,
+            },
         });
 
         expect(environment.SIMPLE).toEqual("Hello");
@@ -20,11 +20,24 @@ describe("Envari", () => {
         expect(process.env.SIMPLE).toEqual("Hello");
         expect(process.env.QUOTED).toEqual("Hello World");
         expect(process.env.COMMENT_INSIDE_QUOTES).toEqual("Hello # World");
+
         expect(() => {
             load({
                 filePath: environmentFilePath,
-                requiredKeys: ["NONEXISTENT"],
+                properties: {
+                    NONEXISTENT: true,
+                },
             });
         }).toThrow();
+
+        expect(
+            load({
+                filePath: environmentFilePath,
+                properties: {
+                    NONEXISTENT: true,
+                },
+                missingPropertyBehavior: "FALLBACK",
+            }).NONEXISTENT
+        ).toEqual("");
     });
 });

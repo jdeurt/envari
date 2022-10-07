@@ -4,15 +4,19 @@ import { EnvariEnvironment } from "../types/environment";
 import type { EnvariConfigurationOptions } from "../types/configuration-options";
 import { parseEnvironmentFile } from "../util/parse-environment-file";
 
-export function load<T extends EnvariEnvironment = EnvariEnvironment>(
-    options: EnvariConfigurationOptions
-): T {
-    const missingProperties =
-        options.requiredProperties ?? options.requiredKeys ?? [];
+export function load<
+    T extends EnvariConfigurationOptions = EnvariConfigurationOptions,
+    P extends EnvariEnvironment = {
+        [K in keyof T["properties"]]: string;
+    }
+>(options: T): P {
+    const missingProperties = Object.keys(options.properties ?? {});
     const missingPropertyBehavior = options.missingPropertyBehavior ?? "THROW";
     const filePath = options.filePath ?? resolve(process.cwd(), ".env");
 
-    const environment: EnvariEnvironment = {};
+    const environment: {
+        [K in keyof T["properties"]]?: string;
+    } = {};
 
     const entries = parseEnvironmentFile(filePath);
 
@@ -21,9 +25,9 @@ export function load<T extends EnvariEnvironment = EnvariEnvironment>(
 
         if (missingPropertyIndex >= 0) {
             missingProperties.splice(missingPropertyIndex, 1);
-        }
 
-        environment[entry.key] = entry.value;
+            environment[entry.key as keyof T["properties"]] = entry.value;
+        }
     }
 
     if (missingProperties.length > 0) {
@@ -34,7 +38,7 @@ export function load<T extends EnvariEnvironment = EnvariEnvironment>(
                 );
             case "FALLBACK":
                 for (const property of missingProperties) {
-                    environment[property] = "";
+                    environment[property as keyof T["properties"]] = "";
                 }
         }
     }
@@ -43,5 +47,5 @@ export function load<T extends EnvariEnvironment = EnvariEnvironment>(
         process.env[property] = environment[property];
     }
 
-    return environment as T;
+    return environment as P;
 }
