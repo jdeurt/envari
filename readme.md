@@ -5,6 +5,12 @@ A safer way to load .env files
 ## Installation
 
 ```bash
+npm i envari
+```
+
+or
+
+```bash
 yarn add envari
 ```
 
